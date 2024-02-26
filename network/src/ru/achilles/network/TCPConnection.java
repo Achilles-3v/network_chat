@@ -12,6 +12,10 @@ public class TCPConnection {
     private final BufferedReader in;
     private final BufferedWriter out;
 
+    public TCPConnection(TCPConnectionListener eventListener, String ipAdr, int port) throws IOException {
+        this(eventListener, new Socket(ipAdr, port));
+    }
+
     public TCPConnection(TCPConnectionListener eventListener, Socket socket) throws IOException {
         this.eventListener = eventListener;
         this.socket = socket;
@@ -28,9 +32,9 @@ public class TCPConnection {
                     }
 
                 } catch (IOException e) {
-
+                    eventListener.onException(TCPConnection.this, e);
                 } finally {
-
+                    eventListener.onDisconnect(TCPConnection.this);
                 }
             }
         });
@@ -38,10 +42,26 @@ public class TCPConnection {
     }
 
     public synchronized void sendString(String value) {
-
+        try {
+            out.write(value + "\r\n");
+            out.flush();
+        } catch (IOException e) {
+            eventListener.onException(TCPConnection.this, e);
+            disconnect();
+        }
     }
 
     public synchronized void disconnect() {
+        rxThread.interrupt();
+        try {
+            socket.close();
+        } catch (IOException e) {
+            eventListener.onException(TCPConnection.this, e);
+        }
+    }
 
+    @Override
+    public String toString() {
+        return "TCPConnection: " + socket.getInetAddress() + ": " + socket.getPort();
     }
 }
