@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class ClientWindow extends JFrame implements ActionListener, TCPConnectionListener {
 
-    private static final String IP_ADDR = "127.0.0.1";
+    private static final String IP_ADR = "127.0.0.1";
     private static final int PORT = 8182;
     private static final int WIDTH = 600;
     private static final int HEIGHT = 400;
@@ -47,7 +47,7 @@ public class ClientWindow extends JFrame implements ActionListener, TCPConnectio
 
         setVisible(true);
         try {
-            connection = new TCPConnection(this, IP_ADDR, PORT);
+            connection = new TCPConnection(this, IP_ADR, PORT);
         } catch (IOException e) {
             printMsg("Connection exception: " + e);
         }
@@ -56,9 +56,10 @@ public class ClientWindow extends JFrame implements ActionListener, TCPConnectio
     @Override
     public void actionPerformed(ActionEvent e) {
         String msg = fieldInput.getText();
-        if(msg.equals("")) return;
-        fieldInput.setText(null);
-        connection.sendString(fieldNickname.getText() + ": " + msg);
+        if(!msg.isEmpty()) {
+            fieldInput.setText(null);
+            connection.sendString(fieldNickname.getText() + ": " + msg);
+        }
     }
 
     @Override
